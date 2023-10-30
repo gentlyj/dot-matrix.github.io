@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Button Matrix</title>
+  <style>
+    button {
+      width: 30px;
+      height: 30px;
+      margin: 2px;
+    }
+    .container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 清空按钮 -->
+<button id="clearButton" style="width: 100px;" onclick="clearAll()">清空</button>
+<p>复制字模数据, 点击确认查看点阵字模:</p>
+<!-- 输入框和确认按钮 -->
+<input type="text" style="width: 400px;" id="inputBox">
+<button id="confirmButton" style="width: 100px;" onclick="applyInput()">确认</button>
+
+<div id="main">
+  <!-- 动态生成按钮和文本框 -->
+</div>
+
+<!-- 实时显示文本 -->
+<p>字模数据:</p>
+<p id="realtimeText"></p>
+
+<script>
+// 初始化16行8列的按钮矩阵和文本框
+for (let row = 0; row < 16; row++) {
+  const container = document.createElement('div');
+  container.className = 'container';
+
+  const textElement = document.createElement('span');
+  textElement.id = `text_${row}`;
+  
+  for (let col = 0; col < 8; col++) {
+    const button = document.createElement('button');
+    button.id = `button_${row}_${col}`;
+    button.style.backgroundColor = 'white';
+    button.addEventListener('click', function() {
+      toggleButton(row, col);
+    });
+    container.appendChild(button);
+  }
+
+  container.appendChild(textElement);
+  document.getElementById('main').appendChild(container);
+
+  updateText(row);
+}
+updateRealtimeText();
+
+// 切换按钮颜色并更新文本
+function toggleButton(row, col) {
+  const button = document.getElementById(`button_${row}_${col}`);
+  button.style.backgroundColor = (button.style.backgroundColor === 'black') ? 'white' : 'black';
+  updateText(row);
+  updateRealtimeText();
+}
+
+// 更新文本框显示值
+function updateText(row) {
+  let value = 0;
+  for (let col = 0; col < 8; col++) {
+    const button = document.getElementById(`button_${row}_${col}`);
+    if (button.style.backgroundColor === 'black') {
+      value += Math.pow(2, 7 - col);
+    }
+  }
+  const textElement = document.getElementById(`text_${row}`);
+  textElement.innerHTML = `0x${value.toString(16).toUpperCase()}`;
+}
+
+// 更新实时显示文本
+function updateRealtimeText() {
+  let values = [];
+  for (let row = 0; row < 16; row++) {
+    const textElement = document.getElementById(`text_${row}`);
+    values.push(textElement.innerHTML);
+  }
+  document.getElementById('realtimeText').innerHTML = values.join(', ');
+}
+
+// 清空所有按钮
+function clearAll() {
+  for (let row = 0; row < 16; row++) {
+    for (let col = 0; col < 8; col++) {
+      const button = document.getElementById(`button_${row}_${col}`);
+      button.style.backgroundColor = 'white';
+    }
+    updateText(row);
+  }
+  updateRealtimeText();
+}
+
+// 应用输入框的值
+function applyInput() {
+  const input = document.getElementById("inputBox").value;
+  const values = input.split(',').map(Number);
+  
+  if (values.length !== 16) {
+    alert('请确保输入16个数字');
+    return;
+  }
+
+  for (let row = 0; row < 16; row++) {
+    let value = values[row];
+    for (let col = 0; col < 8; col++) {
+      const button = document.getElementById(`button_${row}_${col}`);
+      button.style.backgroundColor = (value & Math.pow(2, 7 - col)) ? 'black' : 'white';
+    }
+    updateText(row);
+  }
+  updateRealtimeText();
+}
+</script>
+
+</body>
+</html>
